@@ -5,10 +5,12 @@ Created on Wed Nov 24 15:11:28 2021
 @author: Danylo
 """
 
-### Code for Construction Management Software
+%reset -f
+
+#%% Code for Construction Management Software
 # each section should be own function/code to call
 
-### Read in Data
+#%% Read in Data
 import numpy as np
 import pandas as pd
 import pickle
@@ -21,12 +23,12 @@ df = pd.read_excel(infile)
 
 
 
-### Exploratory Data Analysis
+#%% Exploratory Data Analysis
 
 
 
 
-### Data Wrangling
+#%% Data Wrangling
 # remove unwanted columns
 df.columns
 df = df.drop(columns=['S.NO.', 'PROGRAM GROUP', 'ACTIVITY ID','YEAR', 'MONTH'])
@@ -37,6 +39,7 @@ df['TRANSFORMATION AND DESCRIPTION'] = df['TRANSFORMATION'] + ' ' + df['ACTIVITY
 # remove null (zero) values from target 
 df = df.replace(0,np.nan)
 df = df.dropna(axis=0)
+df = df.reset_index()
 
 # create new columns: completion rate days per unit and inverse
 from datetime import timedelta,datetime
@@ -60,7 +63,7 @@ feature_names = ['TRANSFORMATION AND DESCRIPTION']
 target_names = ['COMPLETION RATE DAYS PER UNIT']
 
 
-### Preprocess
+#%% Preprocess
 # combine columns transformation and activity description
 # remove punctuation
 # split numbers from text
@@ -68,7 +71,7 @@ target_names = ['COMPLETION RATE DAYS PER UNIT']
 # remove capitalization
 # remove word endings
 
-
+"""
 # tf-idf
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -79,14 +82,33 @@ vectorizer = TfidfVectorizer(strip_accents=strip_accents,lowercase=lowercase)
 X = vectorizer.fit_transform(df['TRANSFORMATION AND DESCRIPTION'])
 
 # save tfidf vectorizer
-vectorizer_filename= "vectorizer.pkl"
+vectorizer_filename= "vectorizer_tfidf.pkl"
 with open(vectorizer_filename, 'wb') as outfile:
     pickle.dump(vectorizer,outfile)
+"""
+
+# Count Vectorize - easier to search later
+from sklearn.feature_extraction.text import CountVectorizer
+
+strip_accents = 'ascii'
+lowercase = True
+binary = True
+
+vectorizer = CountVectorizer(strip_accents=strip_accents,lowercase=lowercase,binary=binary)
+X = vectorizer.fit_transform(df['TRANSFORMATION AND DESCRIPTION'])
+
+# save Vectorizer
+vectorizer_filename= "vectorizer_count.pkl"
+with open(vectorizer_filename, 'wb') as outfile:
+    pickle.dump(vectorizer,outfile)
+    
+# save X
+X_filename= "vectorizer_count_X.pkl"
+with open(X_filename, 'wb') as outfile:
+    pickle.dump(X,outfile)
 
 
-
-
-### Split data
+#%% Split data
 from sklearn.model_selection import train_test_split
 X = X
 y = df[target_names]
@@ -99,11 +121,11 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, r
 
 
 
-### Machine Learning Model for 'COMPLETION RATE DAYS PER UNIT'
-"""
+#%% Machine Learning Model for 'COMPLETION RATE DAYS PER UNIT'
+
 # Random Forest Regressor, MAE=123
 from sklearn.ensemble import RandomForestRegressor
-n_estimators = 100
+n_estimators = 500
 random_state = 42
 model = RandomForestRegressor(n_estimators=n_estimators,random_state=random_state)
 model.fit(X_train,y_train.values.ravel())
@@ -112,7 +134,7 @@ model.fit(X_train,y_train.values.ravel())
 model_filename = "model_RandomForestRegressor.pkl"
 with open(model_filename, 'wb') as outfile:
     pickle.dump(model,outfile)
-    """
+    
     
 """
 # Ada Boost Regressor, MAE=194
@@ -128,7 +150,7 @@ with open(model_filename, 'wb') as outfile:
     pickle.dump(model,outfile)
 """ 
 
-
+"""
 # Bagging Regressor, MAE=119
 from sklearn.ensemble import BaggingRegressor
 random_state = 42
@@ -139,7 +161,7 @@ model.fit(X_train,y_train.values.ravel())
 model_filename = "model_BaggingRegressor.pkl"
 with open(model_filename, 'wb') as outfile:
     pickle.dump(model,outfile)   
-    
+    """
 """
 # Gradient Boosting Regressor, MAE=144
 from sklearn.ensemble import GradientBoostingRegressor
@@ -153,26 +175,26 @@ with open(model_filename, 'wb') as outfile:
     pickle.dump(model,outfile)   
 """
 
-### Run Model on Test Dataset
+#%% Run Model on Test Dataset
 y_pred = model.predict(X_test)
 # y_pred = model.predict(vectorizer.transform(['Vertical load test/ 600 mm/ 97 T']))
 # y_pred = model.predict(vectorizer.transform(['yellow']))
 
 
 
-### Analyze Results
+#%% Analyze Results
 # MAE
 from sklearn.metrics import mean_absolute_error
 mae = mean_absolute_error(y_test, y_pred)
-display('========== Feature Importance ==========')
+display('========== Mean Absolute Error ==========')
 display(mae)
 display('========== END ==========')
 
 
 
 
-### Machine Learning Model for 'UNIT'
-target_names = ['UNIT']
+#%% Machine Learning Model for 'UNIT'
+target_names = 'UNIT1'
 
 
 # encode categorical target
@@ -181,17 +203,21 @@ lenc = LabelEncoder()
 _y = df[target_names].values
 lenc.fit(_y.ravel())
 df[target_names] = lenc.transform(_y.ravel())
-target_possibilities = df.UNIT.unique() # fix this, not universal
+target_possibilities = df.UNIT2.unique() # fix this, not universal
 
 # save label encoder
 lenc_filename= "lenc_target.pkl"
 with open(lenc_filename, 'wb') as outfile:
     pickle.dump(lenc,outfile)
-    
+
+#%% save dataframe
+lenc_filename= "dataframe.pkl"
+with open(lenc_filename, 'wb') as outfile:
+    pickle.dump(df,outfile)
     
     
 
-### Split data
+#%% Split data
 
 from sklearn.model_selection import train_test_split
 y = df[target_names]
@@ -204,7 +230,7 @@ y_train = y
 X_test = X
 y_test = y
 
-### Machine Learning Model
+#%% Machine Learning Model
 from sklearn.ensemble import RandomForestClassifier
 
 n_estimators = 100
@@ -221,14 +247,14 @@ with open(model_filename, 'wb') as outfile:
 
 
 
-### Run Model on Test Dataset
+#%% Run Model on Test Dataset
 y_pred = model.predict(X_test)
 
 
 
 
 
-### Analyze Results
+#%% Analyze Results
 # Feature Importance
 feature_importance = list(zip(X_train, model.feature_importances_))
 display('========== Feature Importance ==========')
