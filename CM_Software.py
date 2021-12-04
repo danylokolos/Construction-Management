@@ -16,39 +16,49 @@ from datetime import datetime,timedelta
 import math
 import copy as copy
 
+
+
+
+
 # load model
 model_filename= "model_RandomForestRegressor.pkl"
 with open(model_filename, 'rb') as infile:
-    model_REG=pickle.load(infile)
+    model_REG = pickle.load(infile)
 
 # load vectorizer    
 vectorizer_filename= "vectorizer_count.pkl"
 with open(vectorizer_filename, 'rb') as infile:
-    vectorizer=pickle.load(infile)
+    vectorizer = pickle.load(infile)
  
 # load vectorized X    
 X_filename= "vectorizer_count_X.pkl"
 with open(X_filename, 'rb') as infile:
-    X=pickle.load(infile)    
+    X = pickle.load(infile)    
  
     
 # do the same as above for predicting units
 # load model
 model_filename= "model_RandomForestClassifier.pkl"
 with open(model_filename, 'rb') as infile:
-    model_CLS=pickle.load(infile)
+    model_CLS = pickle.load(infile)
 
 # load Label Encoder    
 lenc_filename= "lenc_target.pkl"
 with open(lenc_filename, 'rb') as infile:
-    lenc=pickle.load(infile)
+    lenc = pickle.load(infile)
     
 # load dataframe
 dataframe_filename = "dataframe.pkl"    
 with open(dataframe_filename, 'rb') as infile:
-    df=pickle.load(infile)
-        
-        
+    df = pickle.load(infile)
+_a = df.shape
+df_numrows = _a[0]
+
+# load exact text for spellchecker
+corpus_text = []
+corpus_filename = "ConstructionWordListForSpellChecker.txt"
+with open(corpus_filename, 'r', encoding="utf-8") as infile:
+    corpus_text = infile.read()
 
 
 #%% CM_Predict_DPU
@@ -95,14 +105,21 @@ def CM_SearchHigh(inputstring):
     search_max_dpu = max(_a[stringmatches])
     return search_max_dpu
 
-#%% Spell Check input string
-#only if doesn't appear in corpus
-def CM_SpellCheck(inputstring):
-    
-    
-    
-    return outputstring
 
+#%% Spell Check input string
+#only if doesn't appear in corpus exactly
+from spellchecker import SpellChecker
+custom_dictionary_infile = 'ConstructionDictionaryForSpellChecker_incl_English.gz'
+spell = SpellChecker(local_dictionary=custom_dictionary_infile,case_sensitive=False)
+def CM_SpellCheck(inputstring):
+    splitstring = inputstring.split(' ')
+    for ii in range(0,len(splitstring)):
+        # check if word is in construction dictionary
+        if not(splitstring[ii].lower() in corpus_text.lower()):
+            # correct if no exact match
+            splitstring[ii] = spell.correction(splitstring[ii])
+    outputstring = ' '.join(splitstring)
+    return outputstring
 
 #%% CM_Predict
 def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
@@ -123,16 +140,17 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
             Transformation[i_trans] = ''
         inputstring = Transformation[i_trans] + ' ' + Description[i_trans]
         
-
+        # Spell check on inputstring
+        inputstring = CM_SpellCheck(inputstring)
         
         # Error handing, missing info
         if Transformation[i_trans] == '' and Description[i_trans] == '':
             if i_trans == 0:
                 output.append('Error: Please add additional information')
             continue
-        elif len(CM_SearchForMatch(inputstring)) == 1330:
-            output.append('========== Prediction for Activity ',int(i_trans+1),': ',inputstring,' ==========',sep='')
-            output.append('Search returned zero results for Activity',int(i_trans+1))
+        elif len(CM_SearchForMatch(inputstring)) == df_numrows:
+            output.append('========== Prediction for Activity {}: {} =========='.format(int(i_trans+1),inputstring))
+            output.append('Search returned zero results for Activity {}'.format(int(i_trans+1)))
             output.append('Please add/adjust information')
             continue
         
@@ -233,17 +251,27 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
 
 
 #%% Sample Inputs For Testing 
+
 '''
 Quantity = ['33','','77','22','65']
-Transformation = ['fire','fire','form work','','']
+Transformation = ['fire','fire','form work','','constraction']
 Description = ['sys','','plinth','','']
 StartDate = '2022-07-22'
 EndDate = ''
 '''
 
+'''
+Quantity = ['','','','','']
+Transformation = ['','','','','']
+Description = ['','','','','']
+StartDate = ''
+EndDate = ''
+'''
+
 #%% Run Program
 
+'''
 #from CM_Software import CM_Predict
 output = CM_Predict(Quantity,Transformation,Description,StartDate,EndDate)
 print('\n'.join(output))
-
+'''

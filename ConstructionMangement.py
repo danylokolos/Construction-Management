@@ -301,3 +301,15 @@ plt.savefig('RF_ConfusionMatrix.png')
 
 plt.show()
 
+#%% Build SpellCheck Dicionary
+#!pip install pyspellchecker
+from spellchecker import SpellChecker
+
+spell = SpellChecker(language='en', case_sensitive=True)
+infile = 'ConstructionWordListForSpellChecker.txt'
+spell.word_frequency.load_text_file(infile)
+outfile = 'ConstructionDictionaryForSpellChecker_incl_English.gz'
+spell.export(outfile, gzipped=True)
+
+
+
