@@ -259,6 +259,12 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
 
 #%% Sample Inputs For Testing 
 
+Quantity = ['33','','77','22','65']
+Transformation = ['fire','fire','form work','','constraction']
+Description = ['sys','','plinth','',' concrite']
+StartDate = '2022-07-22'
+EndDate = ''
+
 '''
 Quantity = ['33','','77','22','65']
 Transformation = ['fire','fire','form work','','constraction']
@@ -282,3 +288,7 @@ EndDate = ''
 output = CM_Predict(Quantity,Transformation,Description,StartDate,EndDate)
 print('\n'.join(output))
 '''
+
+#from CM_Software import CM_Predict
+output = CM_Predict(Quantity,Transformation,Description,StartDate,EndDate)
+print('\n'.join(output))
