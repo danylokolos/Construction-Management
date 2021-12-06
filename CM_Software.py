@@ -123,6 +123,13 @@ def CM_SpellCheck(inputstring):
 
 #%% CM_Predict
 def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
+    # reformat inputs if empty values
+    if Quantity == []: Quantity = ['','','','','']
+    if Transformation ==[]: Transformation = ['','','','','']
+    if Description == []: Description = ['','','','','']
+    if StartDate == []: StartDate = ''
+    if EndDate == []: EndDate = ''    
+    
     nextStartDate = []
     output = []
     
