@@ -247,21 +247,35 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
             output.append('--> Predicted Number of Units Completed in Timeframe: {:.3f}'.format(float(pred_units_completed)))
         # Scenario 6,7,8 - Quantity no, startdate no OR enddate no
         else:
-            output.append('========== Prediction for Activity {}: {} =========='.format(int(i_trans+1),inputstring))
+            output.append('== Activity {}: {} =='.format(int(i_trans+1),inputstring))
             output.append('Predicted Completion Rate, Days per Unit: {:.3f} (min: {:.3f}, max: {:.3f})'.format(float(pred_dpu),float(search_min_dpu),float(search_max_dpu)))
             output.append('Predicted Completion Rate, Units per Day: {:.3f} (min: {:.3f}, max: {:.3f})'.format(1/float(pred_dpu),1/float(search_max_dpu),1/float(search_min_dpu)))
             pred_unit = CM_Predict_Units(inputstring)
             output.append('Units: {}'.format(pred_unit))
             output.append('(Please add additional information (quantity, start date, or end date) for additional analysis)')
+            output.append(' ')
 
-    return output
+    # ugly quick fix line breaks on webpage
+    # correct way is to fix json to allow for line breaks
+    linelength = 52
+    for ii in range(len(output)):
+        for jj in range(len(output[ii]),linelength):
+            output[ii] = output[ii] + ' '
+        if len(output[ii]) > linelength:
+            for jj in range(len(output[ii]),linelength*2):
+                output[ii] = output[ii] + ' '
+        
+    outputnew = ''.join(output)
+    
+
+    return outputnew
 
 
 #%% Sample Inputs For Testing 
 
 Quantity = ['33','','77','22','65']
 Transformation = ['fire','fire','form work','','constraction']
-Description = ['sys','','plinth','',' concrite']
+Description = ['sys','','plinth','','concrite']
 StartDate = '2022-07-22'
 EndDate = ''
 
@@ -291,4 +305,5 @@ print('\n'.join(output))
 
 #from CM_Software import CM_Predict
 output = CM_Predict(Quantity,Transformation,Description,StartDate,EndDate)
-print('\n'.join(output))
+#print('\n'.join(output))
+print(''.join(output))
