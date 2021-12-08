@@ -5,7 +5,7 @@ Created on Wed Nov 24 15:11:28 2021
 @author: Danylo
 """
 
-%reset -f
+#reset -f
 
 #%% Code for Construction Management Software
 # each section should be own function/code to call
@@ -125,7 +125,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, r
 
 # Random Forest Regressor, MAE=123
 from sklearn.ensemble import RandomForestRegressor
-n_estimators = 500
+n_estimators = 100
 random_state = 42
 model = RandomForestRegressor(n_estimators=n_estimators,random_state=random_state)
 model.fit(X_train,y_train.values.ravel())
@@ -186,15 +186,27 @@ y_pred = model.predict(X_test)
 # MAE
 from sklearn.metrics import mean_absolute_error
 mae = mean_absolute_error(y_test, y_pred)
-display('========== Mean Absolute Error ==========')
-display(mae)
-display('========== END ==========')
+print('========== Mean Absolute Error ==========')
+print(mae)
+print('========== END ==========')
 
+# Median Absolute Error
+from sklearn.metrics import median_absolute_error
+mdae = median_absolute_error(y_test, y_pred)
+print('========== Median Absolute Error ==========')
+print(mdae)
+print('========== END ==========')
 
+# MAPE
+from sklearn.metrics import mean_absolute_percentage_error
+mape = mean_absolute_percentage_error(y_test, y_pred)
+print('========== Mean Absolute Percentage Error ==========')
+print(mape)
+print('========== END ==========')
 
 
 #%% Machine Learning Model for 'UNIT'
-target_names = 'UNIT1'
+target_names = 'UNIT'
 
 
 # encode categorical target
@@ -203,7 +215,7 @@ lenc = LabelEncoder()
 _y = df[target_names].values
 lenc.fit(_y.ravel())
 df[target_names] = lenc.transform(_y.ravel())
-target_possibilities = df.UNIT2.unique() # fix this, not universal
+target_possibilities = df.UNIT.unique() # fix this, not universal
 
 # save label encoder
 lenc_filename= "lenc_target.pkl"
@@ -257,29 +269,29 @@ y_pred = model.predict(X_test)
 #%% Analyze Results
 # Feature Importance
 feature_importance = list(zip(X_train, model.feature_importances_))
-display('========== Feature Importance ==========')
-display(feature_importance)
-display('========== END ==========')
+print('========== Feature Importance ==========')
+print(feature_importance)
+print('========== END ==========')
 
 # Accuracy Score
 from sklearn.metrics import accuracy_score
 accuracy = accuracy_score(y_test,y_pred)
-display('========== Accuracy Score ==========')
-display(accuracy)
-display('========== END ==========')
+print('========== Accuracy Score ==========')
+print(accuracy)
+print('========== END ==========')
 
 
 # Confusion Matrix
 from sklearn.metrics import confusion_matrix
 conf_matrix = confusion_matrix(y_test, y_pred)
 
-display('========== Confusion Matrix ==========')
-display(conf_matrix)
-display('========== END ==========')
+print('========== Confusion Matrix ==========')
+print(conf_matrix)
+print('========== END ==========')
 
 
 
-# Plot Confusion Matrix
+#%% Plot Confusion Matrix
 import matplotlib.pyplot as plt
 plt.figure(figsize = (10, 10))
 cmap = plt.cm.Blues
@@ -298,6 +310,7 @@ for ii in range(len(output_labels)):
         else:
             plt.text(ii,jj,conf_matrix[ii,jj],horizontalalignment="center")
 plt.savefig('RF_ConfusionMatrix.png')
+#plt.grid(None)
 
 plt.show()
 
