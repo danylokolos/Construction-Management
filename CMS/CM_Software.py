@@ -151,10 +151,18 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
             StartDate = nextStartDate
         if Transformation[i_trans] == 'other' or Transformation[i_trans] == 'Other':
             Transformation[i_trans] = ''
-        inputstring = Transformation[i_trans] + ' ' + Description[i_trans]
+
+        
+        
+        
+        #inputstring = Transformation[i_trans] + ' ' + Description[i_trans]
         
         # Spell check on inputstring
-        inputstring = CM_SpellCheck(inputstring)
+        
+        _sp_Transformation = CM_SpellCheck(Transformation[i_trans])
+        _sp_Description = CM_SpellCheck(Description[i_trans])
+        inputstring = _sp_Transformation + ' ' + _sp_Description
+        #inputstring = CM_SpellCheck(inputstring)
         
         # Error handing, missing info
         if Transformation[i_trans] == '' and Description[i_trans] == '':
@@ -163,6 +171,7 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
             continue
         elif len(CM_SearchForMatch(inputstring)) == df_numrows:
             output.append('==== Activity {}: {} ===='.format(int(i_trans+1),Transformation[i_trans]))
+            output.append('==== Desc.: {} ===='.format(_sp_Description))
             output.append('Found zero results for Activity {}'.format(int(i_trans+1)))
             output.append('Please add/adjust information')
             continue
@@ -175,16 +184,18 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
         if pred_dpu > search_max_dpu:
             pred_dpu = search_max_dpu   
         
+        # All Scenarios
+        output.append('==== Activity {}: {} ===='.format(int(i_trans+1),Transformation[i_trans]))
+        output.append('==== Desc.: {} ===='.format(_sp_Description))
+        output.append('Predicted Completion Rate, Days per Unit: {:.3f}'.format(float(pred_dpu)))
+        output.append('(min: {:.3f}, max: {:.3f})'.format(float(search_min_dpu),float(search_max_dpu)))
+        output.append('Predicted Completion Rate, Units per Day: {:.3f}'.format(1/float(pred_dpu)))
+        output.append('(min: {:.3f}, max: {:.3f})'.format(1/float(search_max_dpu),1/float(search_min_dpu)))
+        pred_unit = CM_Predict_Units(inputstring)
+        output.append('Units: {}'.format(pred_unit))
+        
         # Scenario 1 - Quantity yes, startdate yes, enddate yes
         if Quantity[i_trans] != '' and StartDate != '' and EndDate != '':
-
-            output.append('==== Activity {}: {} ===='.format(int(i_trans+1),Transformation[i_trans]))
-            output.append('Predicted Completion Rate, Days per Unit: {:.3f}'.format(float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(float(search_min_dpu),float(search_max_dpu)))
-            output.append('Predicted Completion Rate, Units per Day: {:.3f}'.format(1/float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(1/float(search_max_dpu),1/float(search_min_dpu)))
-            pred_unit = CM_Predict_Units(inputstring)
-            output.append('Units: {}'.format(pred_unit))
             output.append('Quantity: {}'.format(Quantity[i_trans]))
             output.append('Start Date: {}'.format(StartDate))
             output.append('End Date: {}'.format(EndDate))
@@ -199,18 +210,10 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
             else:
                 output.append('==> Insufficient Time Allocated to Activity')
                 output.append('==> Predicted Activity End Date: {}'.format(datetime.strftime(newEndDate,'%Y-%m-%d')))
-            output.append(' ')
 
 
         # Scenario 2 - Quantity yes, startdate yes, enddate no
         elif Quantity[i_trans] != '' and StartDate != '' and EndDate == '':
-            output.append('==== Activity {}: {} ===='.format(int(i_trans+1),Transformation[i_trans]))
-            output.append('Predicted Completion Rate, Days per Unit: {:.3f}'.format(float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(float(search_min_dpu),float(search_max_dpu)))
-            output.append('Predicted Completion Rate, Units per Day: {:.3f}'.format(1/float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(1/float(search_max_dpu),1/float(search_min_dpu)))
-            pred_unit = CM_Predict_Units(inputstring)
-            output.append('Units: {}'.format(pred_unit))
             output.append('Quantity: {}'.format(Quantity[i_trans]))
             output.append('Start Date: {}'.format(StartDate))
             pred_numdays = math.ceil(float(Quantity[i_trans])*pred_dpu)
@@ -218,18 +221,10 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
             nextStartDate = datetime.strftime(newEndDate,'%Y-%m-%d')
             output.append('==> Total Predicted Completion Time: {} days'.format(pred_numdays))
             output.append('==> Predicted End Date: {}'.format(datetime.strftime(newEndDate,'%Y-%m-%d')))
-            output.append(' ')
 
 
         # Scenario 3 - Quantity yes, startdate no, enddate yes
         elif Quantity[i_trans] != '' and StartDate == '' and EndDate != '':
-            output.append('==== Activity {}: {} ===='.format(int(i_trans+1),Transformation[i_trans]))
-            output.append('Predicted Completion Rate, Days per Unit: {:.3f}'.format(float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(float(search_min_dpu),float(search_max_dpu)))
-            output.append('Predicted Completion Rate, Units per Day: {:.3f}'.format(1/float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(1/float(search_max_dpu),1/float(search_min_dpu)))
-            pred_unit = CM_Predict_Units(inputstring)
-            output.append('Units: {}'.format(pred_unit))
             output.append('Quantity: {}'.format(Quantity[i_trans]))
             output.append('End Date: {}'.format(EndDate))
             pred_numdays = math.ceil(float(Quantity[i_trans])*pred_dpu)
@@ -237,51 +232,29 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
             EndDate = newStartDate
             output.append('==> Total Predicted Completion Time: {} days'.format(pred_numdays))
             output.append('==> To Complete Activity on Time, Start By Predicted Start Date: {}'.format(datetime.strftime(newStartDate,'%Y-%m-%d')))
-            output.append(' ')
 
         
         # Scenario 4 - Quantity yes, startdate no, enddate no
         elif Quantity[i_trans] != '' and StartDate == '' and EndDate == '':
-            output.append('==== Activity {}: {} ===='.format(int(i_trans+1),Transformation[i_trans]))
-            output.append('Predicted Completion Rate, Days per Unit: {:.3f}'.format(float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(float(search_min_dpu),float(search_max_dpu)))
-            output.append('Predicted Completion Rate, Units per Day: {:.3f}'.format(1/float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(1/float(search_max_dpu),1/float(search_min_dpu)))
-            pred_unit = CM_Predict_Units(inputstring)
-            output.append('Units: {}'.format(pred_unit))
             output.append('Quantity: {}'.format(Quantity[i_trans]))
             pred_numdays = math.ceil(float(Quantity[i_trans])*pred_dpu)
             output.append('==> Total Predicted Completion Time: {} days'.format(pred_numdays))
-            output.append(' ')
 
             
         # Scenario 5 - Quantity no, startdate yes, enddate yes
         elif Quantity[i_trans] == '' and StartDate != '' and EndDate != '':
-            output.append('==== Activity {}: {} ===='.format(int(i_trans+1),Transformation[i_trans]))
-            output.append('Predicted Completion Rate, Days per Unit: {:.3f}'.format(float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(float(search_min_dpu),float(search_max_dpu)))
-            output.append('Predicted Completion Rate, Units per Day: {:.3f}'.format(1/float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(1/float(search_max_dpu),1/float(search_min_dpu)))
-            pred_unit = CM_Predict_Units(inputstring)
-            output.append('Units: {}'.format(pred_unit))
             output.append('Start Date: {}'.format(StartDate))
             output.append('End Date: {}'.format(EndDate))
             num_days_available = (datetime.strptime(EndDate,'%Y-%m-%d') - datetime.strptime(StartDate,'%Y-%m-%d'))/timedelta(days=1)
             pred_units_completed = num_days_available/pred_dpu
             output.append('==> Predicted Number of Units Completed in Timeframe: {:.3f}'.format(float(pred_units_completed)))
-            output.append(' ')
 
         # Scenario 6,7,8 - Quantity no, startdate no OR enddate no
         else:
-            output.append('==== Activity {}: {} ===='.format(int(i_trans+1),Transformation[i_trans]))
-            output.append('Predicted Completion Rate, Days per Unit: {:.3f}'.format(float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(float(search_min_dpu),float(search_max_dpu)))
-            output.append('Predicted Completion Rate, Units per Day: {:.3f}'.format(1/float(pred_dpu)))
-            output.append('(min: {:.3f}, max: {:.3f})'.format(1/float(search_max_dpu),1/float(search_min_dpu)))
-            pred_unit = CM_Predict_Units(inputstring)
-            output.append('Units: {}'.format(pred_unit))
             output.append('(Add additional info for extra analysis)')
-            output.append(' ')
+        
+        # All Scenarios again
+        output.append('. ')
 
 
     # ugly quick fix line breaks on webpage
