@@ -396,19 +396,16 @@ function loadXMLDoc() {
 
 var myHeaders = new Headers();
 
-var val1 = []
-for (let i = 1; i < 6; i++) {
-//  if (document.getElementById("unit_"+i).value != '') {
-    val1.push(document.getElementById("unit_"+i).value)    
-//  }
-}
 
+var val1 = []
 var val3 = []
 for (let i = 1; i < 6; i++) {
-//  if (document.getElementById("desc_"+i).value != '') {
+//  if (document.getElementById("unit_"+i).value != '') {
+    val1.push(document.getElementById("unit_"+i).value)   
     val3.push(document.getElementById("desc_"+i).value)
 //  }
 }
+
 console.log(val1)
 
 var val6 = []

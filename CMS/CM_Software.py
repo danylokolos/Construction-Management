@@ -149,27 +149,26 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
     for i_trans in range(len(Transformation)):
         if nextStartDate != []:
             StartDate = nextStartDate
-        if Transformation[i_trans] == 'other' or Transformation[i_trans] == 'Other':
+
+        # Error handing, missing info
+        if Transformation[i_trans] == 'OTHER' and Description[i_trans] == '':
+            if i_trans == 0:
+                output.append('Error: Please add additional information<br />')
+            else:
+                output.append('== Activity {}: {} ==<br />'.format(int(i_trans+1),Transformation[i_trans]))
+                output.append('Error: Please add additional information<br />')
+            continue
+
+        if Transformation[i_trans] == 'other' or Transformation[i_trans] == 'Other' or Transformation[i_trans] == 'OTHER':
             Transformation[i_trans] = ''
 
-        
-        
-        
-        #inputstring = Transformation[i_trans] + ' ' + Description[i_trans]
-        
         # Spell check on inputstring
-        
         _sp_Transformation = CM_SpellCheck(Transformation[i_trans])
         _sp_Description = CM_SpellCheck(Description[i_trans])
         inputstring = _sp_Transformation + ' ' + _sp_Description
-        #inputstring = CM_SpellCheck(inputstring)
-        
-        # Error handing, missing info
-        if Transformation[i_trans] == '' and Description[i_trans] == '':
-            if i_trans == 0:
-                output.append('Error: Please add additional information<br />')
-            continue
-        elif len(CM_SearchForMatch(inputstring)) == df_numrows:
+          
+        # Error handling, no results     
+        if len(CM_SearchForMatch(inputstring)) == df_numrows:
             output.append('== Activity {}: {} ==<br />'.format(int(i_trans+1),Transformation[i_trans]))
             output.append('== Desc.: {} ==<br />'.format(_sp_Description))
             output.append('Found zero results for Activity {}<br />'.format(int(i_trans+1)))
