@@ -169,6 +169,7 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
           
         # Error handling, no results     
         if len(CM_SearchForMatch(inputstring)) == df_numrows:
+            if Transformation[i_trans] == '': Transformation[i_trans] = 'OTHER'
             output.append('== Activity {}: {} ==<br />'.format(int(i_trans+1),Transformation[i_trans]))
             output.append('== Desc.: {} ==<br />'.format(_sp_Description))
             output.append('Found zero results for Activity {}<br />'.format(int(i_trans+1)))
