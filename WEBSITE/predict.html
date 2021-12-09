@@ -396,13 +396,18 @@ function loadXMLDoc() {
 
 var myHeaders = new Headers();
 
-var val3 = []
 var val1 = []
 for (let i = 1; i < 6; i++) {
-  if (document.getElementById("unit_"+i).value != '') {
+//  if (document.getElementById("unit_"+i).value != '') {
     val1.push(document.getElementById("unit_"+i).value)    
+//  }
+}
+
+var val3 = []
+for (let i = 1; i < 6; i++) {
+//  if (document.getElementById("desc_"+i).value != '') {
     val3.push(document.getElementById("desc_"+i).value)
-  }
+//  }
 }
 console.log(val1)
 
@@ -479,7 +484,7 @@ for(var pIndex = 0; pIndex < phrases.length; pIndex++){
     {
         var currentWord = words[index];
         var currentLength = tenLengthString.length;    
-        if(((currentLength + currentWord.length + ((currentLength > 0) ? 1: 0))) > 48)
+        if(((currentLength + currentWord.length + ((currentLength > 0) ? 1: 0))) > 50)
         {        
             html.push('<div>'+tenLengthString+'</div>');
             console.log(tenLengthString);        

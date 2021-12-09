@@ -142,8 +142,8 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
     # Error handling StartDate after EndDate
     if StartDate != '' and EndDate != '':
         if  datetime.strptime(StartDate,'%Y-%m-%d') > datetime.strptime(EndDate,'%Y-%m-%d'):
-            output.append('Error: Start Date is after End Date')
-            output.append('Please correct and resubmit')
+            output.append('Error: Start Date is after End Date<br />')
+            output.append('Please correct and resubmit<br />')
             return
    
     for i_trans in range(len(Transformation)):
@@ -167,13 +167,13 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
         # Error handing, missing info
         if Transformation[i_trans] == '' and Description[i_trans] == '':
             if i_trans == 0:
-                output.append('Error: Please add additional information')
+                output.append('Error: Please add additional information<br />')
             continue
         elif len(CM_SearchForMatch(inputstring)) == df_numrows:
-            output.append('==== Activity {}: {} ====<br>'.format(int(i_trans+1),Transformation[i_trans]))
-            output.append('==== Desc.: {} ===='.format(_sp_Description))
-            output.append('Found zero results for Activity {}'.format(int(i_trans+1)))
-            output.append('Please add/adjust information')
+            output.append('== Activity {}: {} ==<br />'.format(int(i_trans+1),Transformation[i_trans]))
+            output.append('== Desc.: {} ==<br />'.format(_sp_Description))
+            output.append('Found zero results for Activity {}<br />'.format(int(i_trans+1)))
+            output.append('Please add/adjust information<br />')
             continue
         
         pred_dpu = CM_Predict_DPU(inputstring)
@@ -185,89 +185,88 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
             pred_dpu = search_max_dpu   
         
         # All Scenarios
-        output.append('==== Activity {}: {} ===='.format(int(i_trans+1),Transformation[i_trans]))
-        output.append('==== Desc.: {} ===='.format(_sp_Description))
-        output.append('Predicted Completion Rate, Days per Unit: {:.3f}'.format(float(pred_dpu)))
-        output.append('(min: {:.3f}, max: {:.3f})'.format(float(search_min_dpu),float(search_max_dpu)))
-        output.append('Predicted Completion Rate, Units per Day: {:.3f}'.format(1/float(pred_dpu)))
-        output.append('(min: {:.3f}, max: {:.3f})'.format(1/float(search_max_dpu),1/float(search_min_dpu)))
+        output.append('== Activity {}: {} ==<br />'.format(int(i_trans+1),Transformation[i_trans]))
+        output.append('== Desc.: {} ==<br />'.format(_sp_Description))
+        output.append('Predicted Completion Rate, Days per Unit: {:.3f}<br />'.format(float(pred_dpu)))
+        output.append('(min: {:.3f}, max: {:.3f})<br />'.format(float(search_min_dpu),float(search_max_dpu)))
+        output.append('Predicted Completion Rate, Units per Day: {:.3f}<br />'.format(1/float(pred_dpu)))
+        output.append('(min: {:.3f}, max: {:.3f})<br />'.format(1/float(search_max_dpu),1/float(search_min_dpu)))
         pred_unit = CM_Predict_Units(inputstring)
-        output.append('Units: {}'.format(pred_unit))
+        output.append('Units: {}<br />'.format(pred_unit))
         
         # Scenario 1 - Quantity yes, startdate yes, enddate yes
         if Quantity[i_trans] != '' and StartDate != '' and EndDate != '':
-            output.append('Quantity: {}'.format(Quantity[i_trans]))
-            output.append('Start Date: {}'.format(StartDate))
-            output.append('End Date: {}'.format(EndDate))
+            output.append('Quantity: {}<br />'.format(Quantity[i_trans]))
+            output.append('Start Date: {}<br />'.format(StartDate))
+            output.append('End Date: {}<br />'.format(EndDate))
             
             days_avail = datetime.strptime(EndDate,'%Y-%m-%d') - datetime.strptime(StartDate,'%Y-%m-%d')
             pred_numdays = math.ceil(float(Quantity[i_trans])*pred_dpu)
             newEndDate = datetime.strptime(StartDate,'%Y-%m-%d') + timedelta(days=pred_numdays)
             nextStartDate = datetime.strftime(newEndDate,'%Y-%m-%d')
             if float(Quantity[i_trans]) < (1/float(pred_dpu))*(days_avail/timedelta(days=1)):
-                output.append('==> Sufficient Time Allocated to Project')
-                output.append('==> Predicted Activity End Date: {}'.format(datetime.strftime(newEndDate,'%Y-%m-%d')))
+                output.append(' "Sufficient Time Allocated to Project" <br />')
+                output.append('Predicted Activity End Date: {}<br />'.format(datetime.strftime(newEndDate,'%Y-%m-%d')))
             else:
-                output.append('==> Insufficient Time Allocated to Activity')
-                output.append('==> Predicted Activity End Date: {}'.format(datetime.strftime(newEndDate,'%Y-%m-%d')))
+                output.append(' "Insufficient Time Allocated to Activity" <br />')
+                output.append('Predicted Activity End Date: {}<br />'.format(datetime.strftime(newEndDate,'%Y-%m-%d')))
 
 
         # Scenario 2 - Quantity yes, startdate yes, enddate no
         elif Quantity[i_trans] != '' and StartDate != '' and EndDate == '':
-            output.append('Quantity: {}'.format(Quantity[i_trans]))
-            output.append('Start Date: {}'.format(StartDate))
+            output.append('Quantity: {}<br />'.format(Quantity[i_trans]))
+            output.append('Start Date: {}<br />'.format(StartDate))
             pred_numdays = math.ceil(float(Quantity[i_trans])*pred_dpu)
             newEndDate = datetime.strptime(StartDate,'%Y-%m-%d') + timedelta(days=pred_numdays)
             nextStartDate = datetime.strftime(newEndDate,'%Y-%m-%d')
-            output.append('==> Total Predicted Completion Time: {} days'.format(pred_numdays))
-            output.append('==> Predicted End Date: {}'.format(datetime.strftime(newEndDate,'%Y-%m-%d')))
+            output.append('Total Predicted Completion Time: {} days<br /><br />'.format(pred_numdays))
+            output.append('Predicted End Date: {}<br />'.format(datetime.strftime(newEndDate,'%Y-%m-%d')))
 
 
         # Scenario 3 - Quantity yes, startdate no, enddate yes
         elif Quantity[i_trans] != '' and StartDate == '' and EndDate != '':
-            output.append('Quantity: {}'.format(Quantity[i_trans]))
-            output.append('End Date: {}'.format(EndDate))
+            output.append('Quantity: {}<br />'.format(Quantity[i_trans]))
+            output.append('End Date: {}<br />'.format(EndDate))
             pred_numdays = math.ceil(float(Quantity[i_trans])*pred_dpu)
             newStartDate = datetime.strptime(EndDate,'%Y-%m-%d') - timedelta(days=pred_numdays)
             EndDate = newStartDate
-            output.append('==> Total Predicted Completion Time: {} days'.format(pred_numdays))
-            output.append('==> To Complete Activity on Time, Start By Predicted Start Date: {}'.format(datetime.strftime(newStartDate,'%Y-%m-%d')))
+            output.append('Total Predicted Completion Time: {} days<br /><br />'.format(pred_numdays))
+            output.append('To Complete Activity on Time, Start By Predicted Start Date: {}<br />'.format(datetime.strftime(newStartDate,'%Y-%m-%d')))
 
         
         # Scenario 4 - Quantity yes, startdate no, enddate no
         elif Quantity[i_trans] != '' and StartDate == '' and EndDate == '':
-            output.append('Quantity: {}'.format(Quantity[i_trans]))
+            output.append('Quantity: {}<br />'.format(Quantity[i_trans]))
             pred_numdays = math.ceil(float(Quantity[i_trans])*pred_dpu)
-            output.append('==> Total Predicted Completion Time: {} days'.format(pred_numdays))
+            output.append('Total Predicted Completion Time: {} days<br /><br />'.format(pred_numdays))
 
             
         # Scenario 5 - Quantity no, startdate yes, enddate yes
         elif Quantity[i_trans] == '' and StartDate != '' and EndDate != '':
-            output.append('Start Date: {}'.format(StartDate))
-            output.append('End Date: {}'.format(EndDate))
+            output.append('Start Date: {}<br />'.format(StartDate))
+            output.append('End Date: {}<br />'.format(EndDate))
             num_days_available = (datetime.strptime(EndDate,'%Y-%m-%d') - datetime.strptime(StartDate,'%Y-%m-%d'))/timedelta(days=1)
             pred_units_completed = num_days_available/pred_dpu
-            output.append('==> Predicted Number of Units Completed in Timeframe: {:.3f}'.format(float(pred_units_completed)))
+            output.append('Predicted Number of Units Completed in Timeframe: {:.3f}<br />'.format(float(pred_units_completed)))
 
         # Scenario 6,7,8 - Quantity no, startdate no OR enddate no
         else:
-            output.append('(Add additional info for extra analysis)<br>')
+            output.append('(Add additional info for extra analysis)<br />')
         
         # All Scenarios again
-        output.append('<br>')
+        output.append('=============================================<br />')
 
-    """
+
     # ugly quick fix line breaks on webpage
     # correct way is to fix json to allow for line breaks
-    linelength = 51 
-    for ii in range(len(output)):
-        if len(output[ii]) < linelength:       
-            for jj in range(len(output[ii]),linelength,2):
-                output[ii] = output[ii] + ''
-        elif len(output[ii]) < linelength*2:
-            for jj in range(len(output[ii]),linelength*2,2):
-                output[ii] = output[ii] + ''    x"""
-                
+  #  linelength = 51 
+   # for ii in range(len(output)):
+    #    if len(output[ii]) < linelength:       
+     #       for jj in range(len(output[ii]),linelength,2):
+      #          output[ii] = output[ii] + '. '
+       # elif len(output[ii]) < linelength*2:
+        #    for jj in range(len(output[ii]),linelength*2,2):
+         #       output[ii] = output[ii] + '. '
     outputnew = ''.join(output)
     
     return outputnew    
