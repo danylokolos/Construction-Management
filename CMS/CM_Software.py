@@ -170,7 +170,7 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
                 output.append('Error: Please add additional information')
             continue
         elif len(CM_SearchForMatch(inputstring)) == df_numrows:
-            output.append('==== Activity {}: {} ===='.format(int(i_trans+1),Transformation[i_trans]))
+            output.append('==== Activity {}: {} ====<br>'.format(int(i_trans+1),Transformation[i_trans]))
             output.append('==== Desc.: {} ===='.format(_sp_Description))
             output.append('Found zero results for Activity {}'.format(int(i_trans+1)))
             output.append('Please add/adjust information')
@@ -251,22 +251,23 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
 
         # Scenario 6,7,8 - Quantity no, startdate no OR enddate no
         else:
-            output.append('(Add additional info for extra analysis)')
+            output.append('(Add additional info for extra analysis)<br>')
         
         # All Scenarios again
-        output.append('. ')
+        output.append('<br>')
 
-
+    """
     # ugly quick fix line breaks on webpage
     # correct way is to fix json to allow for line breaks
     linelength = 51 
     for ii in range(len(output)):
         if len(output[ii]) < linelength:       
             for jj in range(len(output[ii]),linelength,2):
-                output[ii] = output[ii] + '. '
+                output[ii] = output[ii] + ''
         elif len(output[ii]) < linelength*2:
             for jj in range(len(output[ii]),linelength*2,2):
-                output[ii] = output[ii] + '. '    
+                output[ii] = output[ii] + ''    x"""
+                
     outputnew = ''.join(output)
     
     return outputnew    

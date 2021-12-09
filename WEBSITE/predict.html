@@ -453,10 +453,52 @@ var startDate = new Date(val4);
 
 fetch("http://127.0.0.1:5007/predict", requestOptions)
   .then(response => response.text())
-  .then(result1 => $("#result").text((JSON.parse(result1)["resp"])))
+  .then(result1 =>  setOutPut(cleanBreak((JSON.parse(result1)["resp"]))))
   .catch(error => console.log('error', error));
   }
  }
+
+ 
+
+ function cleanBreak(str){
+    return str
+            .replace(/<br >/g, "<br>")
+            .replace(/<br \/>/g, "<br>")
+            .replace(/<br\/>/g, "<br>");
+}
+
+function setOutPut(resultDisplay) {
+  var str = resultDisplay
+var phrases = cleanBreak(str).split("<br>");
+var html=[];
+for(var pIndex = 0; pIndex < phrases.length; pIndex++){
+    html.push("<div class='phrase'>");
+    var words = phrases[pIndex].split(" ");
+    var tenLengthString = "";
+    for(var index = 0; index < words.length; index++)
+    {
+        var currentWord = words[index];
+        var currentLength = tenLengthString.length;    
+        if(((currentLength + currentWord.length + ((currentLength > 0) ? 1: 0))) > 48)
+        {        
+            html.push('<div>'+tenLengthString+'</div>');
+            console.log(tenLengthString);        
+            tenLengthString = currentWord;        
+        } else {
+            if(currentLength > 0)
+                tenLengthString += " ";    
+            tenLengthString += currentWord;
+        }    
+        if(index == words.length - 1){
+          console.log(tenLengthString);
+           html.push('<div>'+tenLengthString+'</div>');
+
+        }        
+    }
+    html.push("</div>");
+}
+$("#result").html(html.join(''));
+}
 
    </script>
 </body>

@@ -5,7 +5,7 @@ Created on Wed Nov 24 15:11:28 2021
 @author: Danylo
 """
 
-%reset -f
+#%reset -f
 
 #%% Code for Construction Management Software
 # each section should be own function/code to call
@@ -123,9 +123,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, r
 
 #%% Machine Learning Model for 'COMPLETION RATE DAYS PER UNIT'
 
-# Random Forest Regressor, MAE=123
+# Random Forest Regressor
 from sklearn.ensemble import RandomForestRegressor
-n_estimators = 500
+n_estimators = 100
 random_state = 42
 model = RandomForestRegressor(n_estimators=n_estimators,random_state=random_state)
 model.fit(X_train,y_train.values.ravel())
@@ -137,7 +137,7 @@ with open(model_filename, 'wb') as outfile:
     
     
 """
-# Ada Boost Regressor, MAE=194
+# Ada Boost Regressor
 from sklearn.ensemble import AdaBoostRegressor
 n_estimators = 100
 random_state = 42
@@ -151,7 +151,7 @@ with open(model_filename, 'wb') as outfile:
 """ 
 
 """
-# Bagging Regressor, MAE=119
+# Bagging Regressor
 from sklearn.ensemble import BaggingRegressor
 random_state = 42
 model = BaggingRegressor(random_state=random_state)
@@ -163,7 +163,7 @@ with open(model_filename, 'wb') as outfile:
     pickle.dump(model,outfile)   
     """
 """
-# Gradient Boosting Regressor, MAE=144
+# Gradient Boosting Regressor
 from sklearn.ensemble import GradientBoostingRegressor
 random_state = 42
 model = GradientBoostingRegressor(random_state=random_state)
@@ -186,15 +186,33 @@ y_pred = model.predict(X_test)
 # MAE
 from sklearn.metrics import mean_absolute_error
 mae = mean_absolute_error(y_test, y_pred)
-display('========== Mean Absolute Error ==========')
-display(mae)
-display('========== END ==========')
+print('========== Mean Absolute Error ==========')
+print(mae)
+print('========== END ==========')
 
+# Median Absolute Error
+from sklearn.metrics import median_absolute_error
+mdae = median_absolute_error(y_test, y_pred)
+print('========== Median Absolute Error ==========')
+print(mdae)
+print('========== END ==========')
 
+# MAPE
+from sklearn.metrics import mean_absolute_percentage_error
+mape = mean_absolute_percentage_error(y_test, y_pred)
+print('========== Mean Absolute Percentage Error ==========')
+print(mape)
+print('========== END ==========')
 
+# MSE
+from sklearn.metrics import mean_squared_error
+mse = mean_squared_error(y_test, y_pred)
+print('========== Mean Squared Error ==========')
+print(mse)
+print('========== END ==========')
 
 #%% Machine Learning Model for 'UNIT'
-target_names = 'UNIT1'
+target_names = 'UNIT'
 
 
 # encode categorical target
@@ -203,7 +221,7 @@ lenc = LabelEncoder()
 _y = df[target_names].values
 lenc.fit(_y.ravel())
 df[target_names] = lenc.transform(_y.ravel())
-target_possibilities = df.UNIT2.unique() # fix this, not universal
+target_possibilities = df.UNIT.unique() # fix this, not universal
 
 # save label encoder
 lenc_filename= "lenc_target.pkl"
@@ -285,7 +303,9 @@ plt.figure(figsize = (10, 10))
 cmap = plt.cm.Blues
 plt.imshow(conf_matrix,cmap=cmap)
 plt.grid(None)
-plt.title('Units Confusion Matrix', size = 24)
+plt.title('Units Confusion Matrix',size = 24)
+plt.xlabel('Predicted Value',size = 20)
+plt.ylabel('True Value',size = 20)
 plt.colorbar(aspect=5)
 output_labels = lenc.inverse_transform(target_possibilities)
 tick_marks = np.arange(len(output_labels))
