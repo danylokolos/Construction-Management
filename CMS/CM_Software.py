@@ -272,7 +272,7 @@ def CM_Predict(Quantity,Transformation,Description,StartDate,EndDate):
     return outputnew    
 
     
-#Api calling 
+#%%Api calling 
 @CM_Software.route("/", methods=['GET'])
 def index():
     print("THIS END POINT IS CALLED")
